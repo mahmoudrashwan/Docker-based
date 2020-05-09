@@ -2,7 +2,7 @@ juypter:
 	@cd notebooks; PYTHONPATH=".." jupyter notebook api.ipynb
 
 setup:
-	python3 -m venv ~/.pia-aws
+	python3 -m venv ~/.venv
 
 env:
 	#Show information about environment
@@ -13,15 +13,17 @@ env:
 
 lint:
 	pylint --load-plugins pylint_flask --disable=R,C flask_app/*.py nlib csvcli
-
-lint-circleci:                                                              
-	pylint --output-format=parseable --load-plugins pylint_flask --disable=R,C flask_app/*.py nlib csvcli > $$CIRCLE_ARTIFACTS/pylint.html  
-
-test-circleci:
-	@cd tests; pytest -vv --cov-report html:$$CIRCLE_ARTIFACTS --cov=web --cov=nlib test_*.py  
+	hadolint --ignore=DL3013 dockerfile
 
 test:
 	@cd tests; pytest -vv --cov-report term-missing --cov=web --cov=nlib test_*.py
+
+lint-circleci:                                                              
+	pylint --output-format=parseable --load-plugins pylint_flask --disable=R,C flask_app/*.py nlib csvcli > $$CIRCLE_ARTIFACTS/pylint.html
+	hadolint --ignore=DL3013 dockerfile > $$CIRCLE_ARTIFACTS/hadolint.html
+ 
+test-circleci:
+	@cd tests; pytest -vv --cov-report html:$$CIRCLE_ARTIFACTS --cov=web --cov=nlib test_*.py  
 
 install:
 	pip install -r requirements.txt 
